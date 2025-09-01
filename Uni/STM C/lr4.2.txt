@@ -1,0 +1,193 @@
+#include "stm32f0xx.h"
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_LEN 10
+
+void init_uart()
+{
+    //enable clock for GPIOA and USART2
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+
+    //set PA2 and PA3 to alternate function mode
+    GPIOA->MODER &= ~(GPIO_MODER_MODER2 | GPIO_MODER_MODER3);
+    GPIOA->MODER |= (GPIO_MODER_MODER2_1 | GPIO_MODER_MODER3_1);
+
+    //set alternate function to USART2
+    GPIOA->AFR[0] |= (1 << GPIO_AFRL_AFSEL2_Pos);
+    GPIOA->AFR[0] |= (1 << GPIO_AFRL_AFSEL3_Pos);
+
+    //set baud rate to 9600 (assuming 48 MHz clock)
+    USART2->BRR |= (8000000/9600);
+
+    //enable transmitter and receiver
+    USART2->CR1 |= (USART_CR1_TE | USART_CR1_RE);
+
+    //enable USART2
+    USART2->CR1 |= USART_CR1_UE;
+}
+
+void transmit_char(char c)
+{
+    //wait for TXE flag to be set
+    while(!(USART2->ISR & USART_ISR_TXE));
+
+    //send character
+    USART2->TDR = c;
+}
+
+void transmit_str(char* str)
+{
+    for(uint8_t i=0; i<strlen(str); i++)
+    {
+        transmit_char(str[i]);
+    }
+}
+
+uint8_t parse_command(char* str)
+{
+    if(strcmp(str, "CT") == 0)
+    {
+        return 1;
+    }
+
+    if(strcmp(str, "CR") == 0)
+    {
+        return 2;
+    }
+
+    return 0;
+}
+
+void output_counter(uint8_t counter)
+{
+    char counter_str[MAX_LEN] = "";
+
+    switch(counter)
+    {
+        case 0:
+            strcpy(counter_str, "ZERO");
+            break;
+
+        case 1:
+            strcpy(counter_str, "ONE");
+            break;
+
+        case 2:
+            strcpy(counter_str, "TWO");
+            break;
+
+        case 3:
+            strcpy(counter_str, "THREE");
+            break;
+
+        case 4:
+            strcpy(counter_str, "FOUR");
+            break;
+
+        case 5:
+            strcpy(counter_str, "FIVE");
+            break;
+
+        case 6:
+            strcpy(counter_str, "SIX");
+            break;
+
+        case 7:
+            strcpy(counter_str, "SEVEN");
+            break;
+
+        case 8:
+            strcpy(counter_str, "EIGHT");
+            break;
+
+        case 9:
+            strcpy(counter_str, "NINE");
+            break;
+
+        case 10:
+            strcpy(counter_str, "TEN");
+            break;
+
+        case 11:
+            strcpy(counter_str, "ELEVEN");
+            break;
+
+        case 12:
+            strcpy(counter_str, "TWELVE");
+            break;
+
+        case 13:
+            strcpy(counter_str, "THIRTEEN");
+            break;
+
+        case 14:
+            strcpy(counter_str, "FOURTEEN");
+            break;
+
+        case 15:
+            strcpy(counter_str, "FIFTEEN");
+            break;
+
+        default:
+            strcpy(counter_str, "INVALID");
+            break;
+    }
+
+    transmit_str(counter_str);
+}
+
+int main()
+{
+    uint8_t counter = 0;
+
+    init_uart();
+
+    while(1)
+    {
+        char input = 0;
+
+        //wait for data to be received
+        while(!(USART2->ISR & USART_ISR_RXNE));
+
+        //read data
+        input = USART2->RDR;
+
+        static char buffer[MAX_LEN] = "";
+        static uint8_t buffer_index = 0;
+
+        if(input == '\r')        
+					{
+            uint8_t command = parse_command(buffer);
+
+            if(command == 1) //CT command
+            {
+                counter++;
+                if(counter > 15)
+                {
+                    counter = 0;
+                }
+
+                output_counter(counter);
+            }
+            else if(command == 2) //CR command
+            {
+                transmit_char(counter + '0');
+            }
+
+            buffer_index = 0;
+            memset(buffer, 0, MAX_LEN);
+        }
+        else
+        {
+            buffer[buffer_index++] = input;
+
+            if(buffer_index >= MAX_LEN)
+            {
+                buffer_index = 0;
+                memset(buffer, 0, MAX_LEN);
+            }
+        }
+    }
+}

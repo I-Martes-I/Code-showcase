@@ -1,0 +1,235 @@
+	AREA    RWDATA, DATA, READWRITE
+
+            AREA    PROGRAM, CODE, READONLY
+            ENTRY
+
+Reset_Handler
+
+
+			LDR R1, =0x20000000				;FIRST MASS START ADDR
+			LDR R3, =0x20000008				;FIRST MASS END ADDR
+			LDR R0, =0x00008001				;FIRST NUM
+			LDR R4, =0x20000060				;REGISTER WITH NUMBER OF ELEMENTS 
+			LDR R5, =0x00000000				;ELEMENTS COUNTER
+COUNTER 
+			ADDS R5,R5,#1					;COUNTER INCREMENT
+			ADDS R1,R1,#2					;SHIFT R1 BY 2
+			SUBS R7,R3,R1					;END OF MASS CHECK 
+			BNE COUNTER
+			STR R5,[R4]
+			LDR R1, =0x20000000				;BRING R1 TO START VALUE
+FILL1 
+			STRH R0,[R1]					;STORAGE HALF-WORD R0 TO R1
+			STRH R0,[R1,#2]					;STORAGE HALF-WORD R0 TO R1 WITH SHIFT 2
+			ADDS R1,R1,#4					;SHIFT R1 BY 4
+			SUBS R6,R3,R1					;END OF MASS CHECK 
+			BNE FILL1
+			LDR R1, =0x20000020				;SECOND MASS START ADDR
+			LDR R3, =0x20000028				;SECOND MASS END ADDR
+			LDR R2, =0x00000002				;SECOND NUM
+FILL2 
+			STRH R2,[R1]					;STORAGE HALF-WORD R2 TO R1
+			STRH R2,[R1,#2]					;STORAGE HALF-WORD R2 TO R1 WITH SHIFT 2
+			ADDS R1,R1,#4					;SHIFT R1 BY 4
+			SUBS R6,R3,R1					;END OF MASS CHECK 
+			BNE FILL2
+
+			LDR R1, =0x20000000				;FIRST MASS START ADDR
+			LDR R3, =0x80000000				;MASK 1
+			LDR R7, =0x00008000				;MASK 2
+			LDR R5, =3						;MULTIPLIER
+			LDR R6, =0x7FFFFFFF				;MASK 3
+			SUBS R1, R7, R2					;NUM 2 CHECK OF SIGN 
+			BLT NEGX2 
+			BPL POSX2
+NEGX2 
+			SUBS R1, R7, R0					;NUM 1 CHECK OF SIGN
+			BLT NEGX1
+			BPL POSX1
+POSX2 
+			SUBS R1, R7, R0					;NUM 1 CHECK OF SIGN
+			BLT NEGX1_2
+			BPL POSX1_2
+POSX1_2
+			MULS R2,R5,R2					;MULL X1 BY 3
+			MULS R0,R2,R0					;MULL X1 AND X2
+			ANDS R0,R6						;DELETE SIGN
+			B SECOND
+NEGX1 
+			MULS R0,R5,R0					;MULL X1 BY 3
+			MULS R0,R2,R0					;MULL X1 AND X2
+			ANDS R0,R6						;DELETE SIGN
+			B SECOND
+POSX1 
+			MULS R0,R5,R0					;MULL X1 BY 3
+			MULS R0,R2,R0					;MULL X1 AND X2
+			ORRS R0,R7						;ADD SIGN
+			B SECOND
+NEGX1_2 
+			MULS R0,R5,R0					;MULL X1 BY 3
+			MULS R0,R2,R0					;MULL X1 AND X2
+			ORRS R0,R7						;ADD SIGN
+			B SECOND
+SECOND 
+			LDR R1, =0x00008111				
+			LDR R4, =0x00000000
+			LDR R7, =0x80000000
+			LDR R5, =0x00008000
+			LDR R6, =0x7FFFFFFF
+			SUBS R4, R5, R2
+			BLT NEGX21 
+			BPL POSX21
+NEGX21 
+			SUBS R4, R5, R1 
+			BLT NEG1
+			BPL POS1
+POSX21 
+			SUBS R4, R5, R1
+			BLT NEGX112
+			BPL POSX112
+POSX112
+			LDR R5, =3
+			MULS R0,R2,R0
+			ANDS R2,R6
+			B FINAL
+NEG1 
+			LDR R5, =3
+			MULS R2,R5,R2
+			MULS R0,R2,R0
+			ANDS R2,R6
+			B FINAL
+POS1 
+			LDR R5, =3
+			MULS R2,R5,R2
+			MULS R2,R1,R2
+			ORRS R2,R7
+			B FINAL
+NEGX112 
+			LDR R5, =3
+			MULS R2,R5,R2
+			MULS R2,R1,R2
+			ORRS R2,R7
+			B FINAL
+FINAL 
+			LDR R4, =0x20000040					;MASS 3 START ADDR
+			LDR R3, =0x20000048					;MASS 3 END ADDR
+FILL3 
+			STR R0,[R4]							;ADD ANSWER TO MASS 3
+			STR R2,[R4,#4]						
+			ADDS R4,R4,#8
+			SUBS R6,R3,R4
+			BPL FILL3
+STOP
+		B STOP
+			
+			   AREA    RESET, DATA, READONLY
+            EXPORT  __Vectors
+__Vectors
+            DCD     0x20004000
+            DCD     Reset_Handler
+
+            END
+
+
+
+
+
+
+----- GHDFHASFGSDFGSDFGSDF ------
+            AREA    PROGRAM, CODE, READONLY     ; ???????? ?? ???????????? ????????? ? ??????
+            ENTRY                               ; ???????? ?? ????? ????? ? ?????????
+            ALIGN                               ; ????????? ?? ????? (4 ?????)
+
+Reset_Handler
+			LDR  R0, =0x20000000
+			LDR  R3, =0x20000020
+			LDR  R5, =0x20000040
+			LDR  R6, =0x20000060
+			LDR  R2, =0
+			
+			LDR R4, =4		
+			STR R4, [R6]
+			
+			LDR R4, =0x8001	
+			REV16 R4, R4
+			STRH R4,[R0]
+			
+			LDR R4, =0x0002		
+			REV16 R4, R4
+			STRH R4,[R0, #2]
+			
+			LDR R4, =0x8001	
+			REV16 R4, R4			
+			STRH R4,[R0, #4]
+			
+			LDR R4, =0x0003		
+			REV16 R4, R4
+			STRH R4,[R0, #6]
+		
+			LDR R4, =0x0005		
+			REV16 R4, R4
+			STRH R4,[R3]
+			
+			LDR R4, =0x0007		
+			REV16 R4, R4
+			STRH R4,[R3, #2]
+			
+			LDR R4, =0x8003		
+			REV16 R4, R4
+			STRH R4,[R3, #4]
+			
+			LDR R4, =0x8006		
+			REV16 R4, R4
+			STRH R4,[R3, #6]
+			
+			LDR R4, [R6]
+LOL_1
+			LDR  R6, =0x8000
+			LDRH R7, [R0, R2]
+			REV16 R7, R7
+			TST R7, R6
+			BEQ M1
+			EORS R7, R6
+			RSBS R7, R7, #0
+M1
+			LDRH R1, [R3, R2]
+			REV16 R1, R1
+			TST R1, R6
+			BEQ M2
+			EORS R1, R6
+			RSBS R1, R1, #0
+M2
+			LDR  R6, =3
+			MULS R7, R6, R7
+			MULS R7, R1, R7
+			LDR  R6, =0x8000
+			TST R7, R6
+			BEQ M3
+			EORS R7, R6
+			RSBS R7, R7, #0
+			ORRS R7, R6
+M3	
+			REV16 R7, R7
+			STRH R7, [R5, R2]
+			ADDS R2, #2
+			SUBS R4, #1
+			CMP R4, #0
+			BEQ STOP
+			BNE LOL_1
+STOP
+            B      STOP            
+
+            ALIGN                  
+
+            AREA    RESET, DATA, READONLY ; ???????? ?? ???????????? ???????? ??????????
+            EXPORT  Vectors         ; ??????? ????? Vectors ??? ????????????
+Vectors
+            DCD     0x20004000      ; ?????? ????? (????????? ????? ???)
+            DCD     Reset_Handler   ; ?????? ?????? (?????? ?????????)
+
+            END  
+
+
+
+
+

@@ -1,0 +1,67 @@
+            AREA    DATA, DATA, READWRITE 
+            AREA    PROGRAM, CODE, READONLY     	
+            ENTRY                               	
+            ALIGN                               ; ????????? ?? ????? (4 ?????)
+
+Reset_Handler
+
+            LDR     R0, = 0x20000000	                ; начальный адрес исходного массива			
+			LDR     R2, = 0x20000040		; начальный адрес нового массива
+			LDR     R4, = 0                 ; счетчик элементов исходного массива
+			LDR     R5, = 0                 ; счетчик для перехода к следующему элементу исходного массива
+			LDR     R6, = 0                 ; счетчик для перехода к следующему элементу нового массива
+		
+            LDR     R1, =0x19A4700A	                
+			REV 	R1, R1                  
+            STR		R1,[R0]	
+			
+			LDR     R1, =0xA9B3793F	
+			REV 	R1, R1
+            STR		R1,[R0,#4]		
+			
+			LDR     R1, =0xC35F3A3E	
+			REV 	R1, R1
+            STR		R1,[R0,#8]	
+			
+			LDR     R1, =0xD0CFA360	
+			REV 	R1, R1
+            STR		R1,[R0,#12]	
+			
+			LDR     R1, =0x3DCCFA02	
+			REV 	R1, R1
+            STR		R1,[R0,#16]		
+			
+			LDR     R1, =0xA6BC820A	
+			REV 	R1, R1
+            STR		R1,[R0,#20]	
+			
+			LDR     R1, =0xC04D1AFE	
+			REV 	R1, R1
+            STR		R1,[R0, #24]	
+			
+			LDR     R1, =0x0005ACF4	
+			REV 	R1, R1
+            STR		R1,[R0, #28]
+			
+loop
+			LDR R3, [R0, R5]
+			REV R3, R3
+			REV16 R3, R3
+			STRH R3,[R2, R6]
+			ADDS R5, R5, #4
+			ADDS R6, R6, #2
+			ADDS R4, R4, #1
+			CMP R4, #8
+			BEQ Stop
+			BNE loop
+
+Stop
+            B      Stop   		
+
+            AREA    RESET, DATA, READONLY ; ???????? ?? ???????????? ???????? ??????????
+            EXPORT  Vectors         ; ??????? ????? Vectors ??? ????????????
+Vectors
+            DCD     0x20004000      ; ?????? ????? (????????? ????? ???)
+            DCD     Reset_Handler   ; ?????? ?????? (?????? ?????????)
+
+            END 

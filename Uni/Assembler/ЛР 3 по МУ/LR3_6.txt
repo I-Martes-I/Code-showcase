@@ -1,0 +1,329 @@
+	AREA    RWDATA, DATA, READWRITE
+
+            AREA    PROGRAM, CODE, READONLY
+            ENTRY
+
+Reset_Handler
+			LDR R0, =0x20000000
+			LDR R2, =0x20000010
+			LDR R1, =0x03   							;FIRST NUM OF FIRST MASS
+			STRB R1,  [R0]
+			LDR R1, =0xA2  								;SECOND NUM OF FIRST MASS
+			STRB R1,  [R0,#1]
+			LDR R1, =0x81   							;FIRST NUM OF SECOND MASS
+			STRB R1,  [R2]
+			LDR R1, =0xA2   							;SECOND NUM OF SECOND MASS
+			STRB R1,  [R2,#1]
+			LDR R3, =0x2000003E
+			LDR R4, =0
+			
+			LDR R5, =0
+			LDR R6, =0x7F
+							
+				
+ADDD
+			    ADDS R7,R7,#2
+				LDRB R4, [R0,R5]
+				CMP R4,#0xA2
+				BEQ ADDD2
+				MOV R8,R7
+				LDR R7, =0x8000
+				ANDS R4,R4,R7
+				CMP R4,#0
+				BNE NEGATIVE1   						
+				BEQ POSITIVE1
+NEGATIVE1  		;X1<0
+				LDRB R1, [R2,R5]
+				CMP R1,#0
+				BEQ POSITIVE1_1
+				BNE NEGATIVE1_1
+POSITIVE1_1		;X1<0 X2>0
+				LDRB R4, [R0,R5]
+				LDRB R1, [R3,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				CMP R4,R1
+				BHI HIGH3
+				BLS LOW3
+HIGH3  			;X1<0 X2>0 X1>X2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				LSLS R4,#1
+				SUBS R4,R1
+				ORRS R4,R7
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				ADDS R5,R5,#1
+				B ADDD
+LOW3 			;X1<0 X2>0 X1<X2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				SUBS R1,R4
+				MOVS R4,R1
+				ORRS R4,R7
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				ADDS R5,R5,#1
+				B ADDD
+NEGATIVE1_1  	;X1<0 X2<0
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R1,#1
+				SUBS R1,R4
+				MOVS R4,R1
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				ADDS R5,R5,#1
+				B ADDD
+POSITIVE1   	;X1>0 
+				LDRB R1, [R2,R5]
+				ANDS R1,R1,R7
+				CMP R1,#0
+				BEQ POSITIVE1_2
+				BNE NEGATIVE1_2
+				
+POSITIVE1_2  	;X1>0 X2<0
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				SUBS R4,R1
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				ADDS R5,R5,#1
+				B ADDD
+NEGATIVE1_2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R3,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				CMP R4,R1
+				BHI HIGH4
+				BLS LOW4
+HIGH4  			;X1>0 X2<0 X1>X2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				SUBS R4,R1
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				ADDS R5,R5,#1
+				B ADDD
+LOW4  			;X1>0 X2<0 X1<X2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				SUBS R1,R4
+				MOVS R4,R1
+				ORRS R4,R7
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				ADDS R5,R5,#1
+				B ADDD
+ADDD2
+				
+				LDRB R4, [R0,R5]
+				MOV R8,R7
+				LDR R7, =0x8000
+				ANDS R4,R4,R7
+				CMP R4,#0
+				BNE NEGATIVE2    
+				BEQ POSITIVE2
+NEGATIVE2   	;X1<0
+				LDRB R1, [R2,R5]
+				ANDS R1,R1,R7
+				CMP R1,#0
+				BEQ POSITIVE2_1
+				BNE NEGATIVE2_1
+POSITIVE2_1		;X1<0 X2>0
+				LDRB R4, [R0,R5]
+				LDRB R1, [R3,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				CMP R4,R1
+				BHI HIGH32
+				BLS LOW32
+HIGH32  		;X1<0 X2>0 X1>X2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				LSLS R4,#1
+				SUBS R4,R1
+				ORRS R4,R7
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				B STOP
+LOW32 			;X1<0 X2>0 X1<X2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				SUBS R1,R4
+				MOVS R4,R1
+				ORRS R4,R7
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				B STOP
+NEGATIVE2_1		;X1<0 X2<0
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R1,#1
+				SUBS R1,R4
+				MOVS R4,R1
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				B STOP
+POSITIVE2   	;X1>0 
+				LDRB R1, [R2,R5]
+				ANDS R1,R1,R7
+				CMP R1,#0
+				BEQ POSITIVE2_2
+				BNE NEGATIVE2_2
+				
+POSITIVE2_2  	;X1>0 X2<>0
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				LSLS R1,#1
+				ADDS R4,R1
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				B STOP
+NEGATIVE2_2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R3,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				CMP R4,R1
+				BHI HIGH42
+				BLS LOW42
+HIGH42  		;X1>0 X2<0 X1>X2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				SUBS R4,R1
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				B STOP
+LOW42  			;X1>0 X2<0 X1<X2
+				LDRB R4, [R0,R5]
+				LDRB R1, [R2,R5]
+				ANDS R4,R4,R6
+				ANDS R1,R1,R6
+				LSLS R4,#1
+				SUBS R1,R4
+				MOVS R4,R1
+				ORRS R4,R7
+				MOV R7,R8
+				STRH R4, [R3,R7]
+				B STOP
+STOP
+       B STOP
+			
+			   AREA    RESET, DATA, READONLY
+            EXPORT  __Vectors
+__Vectors
+            DCD     0x20004000
+            DCD     Reset_Handler
+
+            END
+
+
+
+
+			----- ----- ПРИВЕТ ----- -----
+			            AREA    PROGRAM, CODE, READONLY     ; ???????? ?? ???????????? ????????? ? ??????
+            ENTRY                               ; ???????? ?? ????? ????? ? ?????????
+            ALIGN                               ; ????????? ?? ????? (4 ?????)
+
+Reset_Handler
+			LDR  R0, =0x20000000
+			LDR  R3, =0x20000010
+			LDR  R5, =0x20000040
+			
+			LDR R4, =0x81		
+			STRB R4,[R0]
+			
+			LDR R4, =0x02		
+			STRB R4,[R0, #1]
+			
+			LDR R4, =0x81		
+			STRB R4,[R0, #2]
+			
+			LDR R4, =0xA2		
+			STRB R4,[R0, #3]
+			
+			LDR R4, =0x03		
+			STRB R4,[R3]
+			
+			LDR R4, =0x12		
+			STRB R4,[R3, #1]
+			
+			LDR R4, =0x83		
+			STRB R4,[R3, #2]
+			
+			LDR R4, =0xA2		
+			STRB R4,[R3, #3]
+			
+			LDR  R2, =0
+			LDR  R4, =0
+LOL_1
+			LDR  R6, =0x80
+			LDRB R7, [R0, R2]
+			TST R7, R6
+			BEQ M1
+			EORS R7, R6
+			RSBS R7, R7, #0
+M1
+			LDRB R1, [R3, R2]
+			TST R1, R6
+			BEQ M2
+			EORS R1, R6
+			RSBS R1, R1, #0
+M2
+			LDR  R6, =0x8000
+			ADDS R7, R7, R7
+			ADDS R7, R7, R1
+			TST R7, R6
+			BEQ M3
+			EORS R7, R6
+			RSBS R7, R7, #0
+			ORRS R7, R6
+M3	
+			REV16 R7, R7
+			STRH R7, [R5, R4]
+			ADDS R4, #2
+			ADDS R2, #1
+			CMP R2, #4
+			BEQ STOP
+			BNE LOL_1
+STOP
+            B      STOP            
+
+            ALIGN                  
+
+            AREA    RESET, DATA, READONLY ; ???????? ?? ???????????? ???????? ??????????
+            EXPORT  Vectors         ; ??????? ????? Vectors ??? ????????????
+Vectors
+            DCD     0x20004000      ; ?????? ????? (????????? ????? ???)
+            DCD     Reset_Handler   ; ?????? ?????? (?????? ?????????)
+
+            END  

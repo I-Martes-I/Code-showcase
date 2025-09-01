@@ -1,0 +1,185 @@
+	AREA    RWDATA, DATA, READWRITE
+
+            AREA    PROGRAM, CODE, READONLY
+            ENTRY
+
+Reset_Handler
+			LDR R0, =0x20000000 ; Start mass
+			LDR R4, =0x00 ; max element of mass
+			LDR R6, =0 ; counter
+			LDR R5, =0 ; COUNTER
+			LDR R2,=0X20000040
+			LDR R3,=0
+
+			LDR R1, =0x9 ; filling mass with numbers
+			STRB R1, [R0]
+			LDR R1, =0x1
+			STRB R1, [R0, #1]
+			LDR R1, =0x8
+			STRB R1, [R0, #2]
+			LDR R1, =0x2
+			STRB R1, [R0, #3]
+			LDR R1, =0x7
+			STRB R1, [R0, #4]
+			LDR R1, =0x3
+			STRB R1, [R0, #5]
+			LDR R1, =0x6
+			STRB R1, [R0, #6]
+			LDR R1, =0x4
+			STRB R1, [R0, #7]
+			LDR R1, =0x1
+			STRB R1, [R0, #8]
+			LDR R1, =0x9
+			STRB R1, [R0, #9]
+			LDR R1, =0x2
+			STRB R1, [R0, #10]
+			LDR R1, =0x8
+			STRB R1, [R0, #11]
+			LDR R1, =0x3
+			STRB R1, [R0, #12]
+			LDR R1, =0x7
+			STRB R1, [R0, #13]
+			LDR R1, =0x4
+			STRB R1, [R0, #14]
+			LDR R1, =0x6
+			STRB R1, [R0, #15]
+			LDR R1, =0x5
+			STRB R1, [R0, #16]
+			
+
+START
+			ADDS R6, R6, #1
+			CMP R6, #18 ; stop count
+			BEQ CIRCLE
+			LDRB R1, [R0] ; load number to register
+			PUSH {R1}
+			ADDS R0, R0, #1; 
+			CMP R1, 0 ; 
+			BNE max
+			CMP R6, #18
+			BLE START
+STOP
+			B STOP
+max
+			CMP R1, R4 ; compare register for max number finding
+			BLE START
+			MOV R7, R6
+			MOV R4, R1 ; max element finding
+			
+			B START
+			
+CIRCLE
+			STRB R4, [R2, R3] ;INCREMENT SDVIG
+			ADDS R3, #1
+			LDR R4,=0
+			LDR R0,=0X20000000
+			SUBS R7, 1
+			LDR R6, =0
+			STRB R6, [R0, R7]
+			ADDS R5, R5, #1
+			CMP R5, #18
+			BEQ STOP
+			BNE START
+			
+			   AREA    RESET, DATA, READONLY
+            EXPORT  __Vectors
+__Vectors
+            DCD     0x20004000
+            DCD     Reset_Handler
+
+            END
+
+
+
+
+
+
+----- ПРВИЛЬНОЕ РЕШЕНИЕ -----
+            AREA    DATA, DATA, READWRITE 
+ARR_START   EQU 0x20000000
+ARR         DCB     0x00, 0x12, 0xF2, 0xA0, 0x52, 0xAC, 0x17, 0x51, 0x32, 0xBC, 0x22, 0x85, 0xF1, 0x15, 0xA3, 0x5F, 0x77
+            AREA    PROGRAM, CODE, READONLY     	
+            ENTRY                               	
+            ALIGN                               ; ????????? ?? ????? (4 ?????)
+
+Reset_Handler
+			LDR R0, =0x20000000        ; начальный адрес исходного массива
+			LDR R4, =0x00              ; максимальный элемент массива
+			LDR R6, =0                 ; счетчик элементов исходного массива при нахождении максимального элемента
+			LDR R5, =0                 ; счетчик элементов исходного массива для проверки количества элементов
+			LDR R2,=0X20000020         ; начальный адрес отсортированного массива
+			LDR R3,=0                  ; счетчик элементов отсортированного массива для записи в него элементов
+			
+			LDR R1, =0x09 
+			STRB R1, [R0]
+			LDR R1, =0x11
+			STRB R1, [R0, #1]
+			LDR R1, =0x08
+			STRB R1, [R0, #2]
+			LDR R1, =0x22
+			STRB R1, [R0, #3]
+			LDR R1, =0x07
+			STRB R1, [R0, #4]
+			LDR R1, =0x33
+			STRB R1, [R0, #5]
+			LDR R1, =0x06
+			STRB R1, [R0, #6]
+			LDR R1, =0x44
+			STRB R1, [R0, #7]
+			LDR R1, =0x01
+			STRB R1, [R0, #8]
+			LDR R1, =0x79
+			STRB R1, [R0, #9]
+			LDR R1, =0x02
+			STRB R1, [R0, #10]
+			LDR R1, =0x18
+			STRB R1, [R0, #11]
+			LDR R1, =0x03
+			STRB R1, [R0, #12]
+			LDR R1, =0x77
+			STRB R1, [R0, #13]
+			LDR R1, =0x40
+			STRB R1, [R0, #14]
+			LDR R1, =0x60
+			STRB R1, [R0, #15]
+			LDR R1, =0x50
+			STRB R1, [R0, #16]
+			
+
+LOOP
+			ADDS R6, R6, #1
+			CMP R6, #17 
+			BHI SDVIG
+			LDRB R1, [R0]
+			ADDS R0, R0, #1
+			CMP R1, R4 
+			BHI MAX
+			CMP R6, #17
+			BHI STOP
+			BLS LOOP
+MAX
+			MOV R7, R6           ; копируем в R7 значение счетчика из R6
+			MOV R4, R1           ; копируем в R4 элемент из R1
+			B LOOP
+SDVIG
+			STRB R4, [R2, R3]    ; копируем в адрес (R2 + R3) максимальный найденный элемент
+			ADDS R3, #1          
+			LDR R4,=0
+			LDR R0,=0X20000000
+			SUBS R7, 1
+			LDR R6, =0
+			STRB R6, [R0, R7]    ; копируем в R6 значение счетчика из адреса (R0 + R7)
+			ADDS R5, R5, #1
+			CMP R5, #17
+			BEQ STOP
+			BLO LOOP	
+STOP
+			B STOP			
+
+            AREA    RESET, DATA, READONLY ; ???????? ?? ???????????? ???????? ??????????
+            EXPORT  Vectors         ; ??????? ????? Vectors ??? ????????????
+Vectors
+            DCD     0x20004000      ; ?????? ????? (????????? ????? ???)
+            DCD     Reset_Handler   ; ?????? ?????? (?????? ?????????)
+
+            END  

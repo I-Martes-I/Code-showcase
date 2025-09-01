@@ -1,0 +1,285 @@
+; Микроконтроллер STM32F072RBT6
+            ; ОЗУ
+            ; Адрес начала: 0x20000000
+            ; Объем: 0x4000 байт (16 Кбайт)
+            ; ПЗУ
+            ; Адрес начала: 0x08000000
+            ; Объем: 0x20000 байт (128 Кбайт)
+
+            ; Секция с программой
+            ; Обязательная секция
+            AREA    PROGRAM, CODE, READONLY     ; Указание на расположение программы в памяти
+            ENTRY                               ; Указание на точку входа в программу
+            ALIGN                               ; Выровнять по слову (4 байта)
+
+Reset_Handler
+			LDR  R0, =0x20000000     ; начальный адрес исходного массива 
+			LDR  R3, =0x20000020     ; конечный адрес исходного массива
+			LDR  R5, =0x20000040     ; начальный адрес нового массива 
+			LDR  R6, =0x8000
+			
+			LDR R4, =0x8001	
+			REV16 R4, R4
+			STRH R4,[R0]
+			
+			LDR R4, =0x0022		
+			REV16 R4, R4
+			STRH R4,[R0, #2]
+			
+			LDR R4, =0x8060		
+			REV16 R4, R4
+			STRH R4,[R0, #4]
+			
+			LDR R4, =0x8002		
+			REV16 R4, R4
+			STRH R4,[R0, #6]
+			
+			LDR R4, =0x8001	
+			REV16 R4, R4
+			STRH R4,[R0, #8]
+			
+			LDR R4, =0x0202		
+			REV16 R4, R4
+			STRH R4,[R0, #10]
+			
+			LDR R4, =0x8301		
+			REV16 R4, R4
+			STRH R4,[R0, #12]
+			
+			LDR R4, =0x8022		
+			REV16 R4, R4
+			STRH R4,[R0, #14]
+			
+			LDR R4, =0x8090	
+			REV16 R4, R4
+			STRH R4,[R0, #16]
+			
+			LDR R4, =0x0552		
+			REV16 R4, R4
+			STRH R4,[R0, #18]
+			
+			LDR R4, =0x8001		
+			REV16 R4, R4
+			STRH R4,[R0, #20]
+			
+			LDR R4, =0x8075	
+			REV16 R4, R4
+			STRH R4,[R0, #22]
+			
+			LDR R4, =0x80AB	
+			REV16 R4, R4
+			STRH R4,[R0, #24]
+			
+			LDR R4, =0x0C02		
+			REV16 R4, R4
+			STRH R4,[R0, #26]
+			
+			LDR R4, =0x8A01		
+			REV16 R4, R4
+			STRH R4,[R0, #28]
+			
+			LDR R4, =0x8D32		
+			REV16 R4, R4
+			STRH R4,[R0, #30]
+			
+			LDR  R2, =0
+			LDR  R4, =0
+			
+LOOP_1
+			LDR  R6, =0x8000
+			LDRH R7, [R0, R2]
+			REV16 R7, R7
+			TST R7, R6              ; проверка бита знака, переходим по метке, если число отрицательное (Z = 0)
+			BNE NEGATIVE
+LOOP_1_1
+			ADDS R2, #2
+			ADDS R6, R0, R2
+			CMP R6, R3
+			BEQ SECOND_TIME
+			BNE LOOP_1
+
+NEGATIVE
+            LDR  R6, =0x10
+			ADDS R7, R6
+			REV16 R7, R7
+			STRH R7, [R5, R4]      ; копируем отрицательное число в новый массив
+			ADDS R4, #2
+			BAL LOOP_1_1
+			
+SECOND_TIME
+			LDR  R0, =0x20000000
+			LDR  R2, =0
+			
+			
+LOOP_2
+			LDR  R6, =0x8000
+			LDRH R7, [R0, R2]
+			REV16 R7, R7 
+			TST R7, R6              ; проверка бита знака, переходим по метке, если число положительное (Z = 1)
+			BEQ POSITIVE
+LOOP_2_1
+			ADDS R2, #2
+			ADDS R6, R0, R2
+			CMP R6, R3
+			BEQ STOP
+			BNE LOOP_2
+
+POSITIVE
+            SUBS R7, #2
+			REV16 R7, R7
+			STRH R7, [R5, R4]       ; копируем положительное число в новый массив
+			ADDS R4, #2
+			BAL LOOP_2_1
+
+STOP
+            B      STOP   
+
+
+            ALIGN                   ; Выровнять по слову (4 байта)
+
+            ; Секция с таблицей векторов прерываний.
+            ; Этот секция обязательна. Без нее программа не будет компилироваться.
+            AREA    RESET, DATA, READONLY ; Указание на расположение векторов прерываний
+            EXPORT  Vectors         ; Экспорт метки Vectors для компоновщика
+Vectors
+            DCD     0x20004000      ; Начало стека (последний адрес ОЗУ)
+            DCD     Reset_Handler   ; Вектор сброса (начало программы)
+
+            END                     ; Команда транслятору об окончании текста про
+
+
+
+
+
+-правильное сука решение но не совсем правильное
+
+Reset_Handler
+			LDR  R0, =0x20000000     ; начальный адрес исходного массива 
+			LDR  R3, =0x20000020     ; конечный адрес исходного массива
+			LDR  R5, =0x20000040     ; начальный адрес нового массива 
+			
+			LDR R4, =0x8001	
+			REV16 R4, R4
+			STRH R4,[R0]
+			
+			LDR R4, =0x0022		
+			REV16 R4, R4
+			STRH R4,[R0, #2]
+			
+			LDR R4, =0x8060		
+			REV16 R4, R4
+			STRH R4,[R0, #4]
+			
+			LDR R4, =0x8002		
+			REV16 R4, R4
+			STRH R4,[R0, #6]
+			
+			LDR R4, =0x8001	
+			REV16 R4, R4
+			STRH R4,[R0, #8]
+			
+			LDR R4, =0x0202		
+			REV16 R4, R4
+			STRH R4,[R0, #10]
+			
+			LDR R4, =0x8301		
+			REV16 R4, R4
+			STRH R4,[R0, #12]
+			
+			LDR R4, =0x8022		
+			REV16 R4, R4
+			STRH R4,[R0, #14]
+			
+			LDR R4, =0x8090	
+			REV16 R4, R4
+			STRH R4,[R0, #16]
+			
+			LDR R4, =0x0552		
+			REV16 R4, R4
+			STRH R4,[R0, #18]
+			
+			LDR R4, =0x8001		
+			REV16 R4, R4
+			STRH R4,[R0, #20]
+			
+			LDR R4, =0x8075	
+			REV16 R4, R4
+			STRH R4,[R0, #22]
+			
+			LDR R4, =0x80AB	
+			REV16 R4, R4
+			STRH R4,[R0, #24]
+			
+			LDR R4, =0x00C2		
+			REV16 R4, R4
+			STRH R4,[R0, #26]
+			
+			LDR R4, =0x8A01		
+			REV16 R4, R4
+			STRH R4,[R0, #28]
+			
+			LDR R4, =0x8D32		
+			REV16 R4, R4
+			STRH R4,[R0, #30]
+			
+			LDR  R2, =0
+			LDR  R4, =0
+			
+LOOP_1
+			LDR  R6, =0x8000        ; маска знака двухбайтового числа
+			LDRH R7, [R0, R2]
+			REV16 R7, R7
+			TST R7, R6              ; проверка бита знака, переходим по метке, если число отрицательное (Z = 0)
+			BNE NEGATIVE
+LOOP_1_1
+            LDR  R6, =0             ; используем данный регистр также для проверки текущего адреса 
+			ADDS R2, #2
+			ADDS R6, R0, R2         ; в регистре R6 теперь текущий адрес 
+			CMP R6, R3              ; сравниваем текщий адрес конечным адресом
+			BEQ SECOND_TIME
+			BNE LOOP_1
+
+NEGATIVE
+            LDR  R6, =0x8000
+            EORS R7, R6
+			RSBS R7, R7, #0
+            LDR  R1, =0x10
+			ADDS R7, R7, R1
+			TST R7, R6
+			BEQ RESULT_1
+			EORS R7, R6
+			RSBS R7, R7, #0
+			ORRS R7, R6
+RESULT_1
+			REV16 R7, R7
+			STRH R7, [R5, R4]      ; копируем отрицательное число в новый массив
+			ADDS R4, #2
+			BAL LOOP_1_1
+			
+SECOND_TIME
+			LDR  R0, =0x20000000
+			LDR  R2, =0
+			
+			
+LOOP_2
+			LDR  R6, =0x8000
+			LDRH R7, [R0, R2]
+			REV16 R7, R7 
+			TST R7, R6              ; проверка бита знака, переходим по метке, если число положительное (Z = 1)
+			BEQ POSITIVE
+LOOP_2_1
+			ADDS R2, #2
+			ADDS R6, R0, R2
+			CMP R6, R3
+			BEQ STOP
+			BNE LOOP_2
+
+POSITIVE
+            SUBS R7, #2
+			REV16 R7, R7
+			STRH R7, [R5, R4]       ; копируем положительное число в новый массив
+			ADDS R4, #2
+			BAL LOOP_2_1
+
+STOP
+            B      STOP   

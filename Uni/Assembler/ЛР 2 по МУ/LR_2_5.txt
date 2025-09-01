@@ -1,0 +1,73 @@
+            AREA    DATA, DATA, READWRITE 
+            AREA    PROGRAM, CODE, READONLY     	
+            ENTRY                               	
+            ALIGN                               ; ????????? ?? ????? (4 ?????)
+
+Reset_Handler
+            
+            LDR  R0, =0x20000000    ; начальный адрес исходного массива
+			LDR  R1, =0     	; счетчик элементов исходного массива
+            LDR  R2, =0     	; счетчик элементов нового массива
+			LDR  R3, =0x80	       ; маска знака
+			LDR	 R5, =0x20000040    ; начальный адрес нового массива из положительных чисел
+			LDR  R7, =0     	; счетчик отрицательных элементов исходного массива			
+
+			LDR R4, =0xA1	
+			STRB R4,[R0]
+			
+			LDR R4, =0x3A	
+			STRB R4,[R0, #1]
+			
+			LDR R4, =0x83	
+			STRB R4,[R0, #2]
+			
+			LDR R4, =0x8B	
+			STRB R4,[R0, #3]
+			
+			LDR R4, =0x1C	
+			STRB R4,[R0, #4]
+			
+			LDR R4, =0xA1	
+			STRB R4,[R0, #5]
+			
+			LDR R4, =0x2A	
+			STRB R4,[R0, #6]
+			
+			LDR R4, =0x23	
+			STRB R4,[R0, #7]
+			
+			LDR R4, =0x1B	
+			STRB R4,[R0, #8]
+			
+			LDR R4, =0x8C	
+			STRB R4,[R0, #9]
+			
+			LDR R4, =0x20000020    ; адрес, в который записывается количество отрицательных элементов
+loop_1
+			LDRB R6, [R0, R1]
+			TST R6, R3	
+			BEQ POS_ARR
+			BNE NEG
+loop_2			
+			ADDS R1, R1, #1
+			CMP R1, #10
+			BEQ Stop
+			BLS loop_1
+POS_ARR
+			STRB R6, [R5, R2]
+			ADDS R2, R2, #1
+			B loop_2
+NEG
+			ADDS R7, R7, #1
+			STRB R7, [R4]
+			B loop_2
+Stop
+            B      Stop    	
+
+            AREA    RESET, DATA, READONLY ; ???????? ?? ???????????? ???????? ??????????
+            EXPORT  Vectors         ; ??????? ????? Vectors ??? ????????????
+Vectors
+            DCD     0x20004000      ; ?????? ????? (????????? ????? ???)
+            DCD     Reset_Handler   ; ?????? ?????? (?????? ?????????)
+
+            END 

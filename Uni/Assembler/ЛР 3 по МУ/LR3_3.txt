@@ -1,0 +1,221 @@
+	AREA    RWDATA, DATA, READWRITE
+
+            AREA    PROGRAM, CODE, READONLY
+            ENTRY
+
+Reset_Handler
+			
+			LDR R0, =0x20000000 					;START MASS ADDR
+			LDR R1, =0x00001672 					;MASS NUMBER FILLING
+			STR R1, [R0]
+			LDR R1, =0x8000561
+			STR R1, [R0, #4]
+			LDR R1, =0x00001221
+			STR R1, [R0, #8]
+			LDR R1, =0x80001814
+			STR R1, [R0, #12]
+			LDR R1, =0x80000061
+			STR R1, [R0, #16]
+			LDR R1, =0x00002735
+			STR R1, [R0, #20]
+			LDR R1, =0x80003720
+			STR R1, [R0, #24]
+			LDR R1, =0x0007417
+			STR R1, [R0, #28]
+			LDR R1, =0x00008212
+			STR R1, [R0, #32]
+			LDR R1, =0x80002611
+			STR R1, [R0, #36]
+			LDR R1, =0
+			LDR R2, =0
+			LDR R3, =0
+			LDR R4, =0x000000FF
+			LDR R5, =0x20000040
+			LDR R6, =0
+			LDR R7, =0
+			
+START
+			ADDS R6, R6, #1
+
+			CMP R6, #11 							;END OF MASS CHECK
+			BEQ NEXT
+			LDR R1, [R0,R3]
+			ADDS R3,R3,#4
+			SUBS R1,#0
+			BPL POSITIVE
+			B START
+NEXT
+			
+			LDR R6, =0
+			LDR R3, =0
+			LDR R4, =0x0000000F
+			LDR R1, =0
+			B NEGATIVE
+NEXT1
+			LDR R6, =0
+			SUBS R6, #1
+			STRB R2, [R5,R6]
+			
+STOP
+			B STOP
+POSITIVE
+			ANDS R1,R4
+			CMP R1, #0x00000012
+			BEQ FILL
+			B START
+FILL
+			ADDS R2,R2,#1
+			SUBS R3,R3,#4
+			LDR R1 , [R0,R3]
+			ADDS R3,R3,#4
+			STRH R1, [R5,R7]
+			ADDS R7, R7, #2
+			B START
+			
+NEGATIVE
+			ADDS R6, R6, #1
+			CMP R6, #11 							;END OF MASS CHECK
+			BEQ NEXT1
+			LDR R1, [R0,R3]
+			ADDS R3,R3,#4
+			SUBS R1,#0
+			BMI NEG_CHECK
+			B NEGATIVE
+NEG_CHECK
+			ANDS R1,R4
+			BEQ FILL1
+			B NEGATIVE
+FILL1
+			ADDS R2,R2,#1
+			SUBS R3,R3,#4
+			LDR R1 , [R0,R3]
+			ADDS R3,R3,#4
+			STRH R1, [R5,R7]
+			ADDS R7, R7, #2
+			B NEGATIVE
+
+			
+			   AREA    RESET, DATA, READONLY
+            EXPORT  __Vectors
+__Vectors
+            DCD     0x20004000
+            DCD     Reset_Handler
+
+            END
+
+
+
+
+
+
+			----- ПРАВИЛЬНОЕ РЕШЕНИЕ -----
+			            AREA    PROGRAM, CODE, READONLY     ; ???????? ?? ???????????? ????????? ? ??????
+            ENTRY                               ; ???????? ?? ????? ????? ? ?????????
+            ALIGN                               ; ????????? ?? ????? (4 ?????)
+
+Reset_Handler
+            
+            LDR  R0, =0x20000000    
+            LDR  R2, =0            
+			LDR  R7, =0
+			LDR	 R5, =0x20000040				
+
+			LDR R4, =0x00A1		
+			REV16 R4, R4
+			STRH R4,[R0]
+			
+			LDR R4, =0x803A		
+			REV16 R4, R4
+			STRH R4,[R0, #2]
+			
+			LDR R4, =0x3443		
+			REV16 R4, R4
+			STRH R4,[R0, #4]
+			
+			LDR R4, =0x804B		
+			REV16 R4, R4
+			STRH R4,[R0, #6]
+			
+			LDR R4, =0x81C5		
+			REV16 R4, R4
+			STRH R4,[R0, #8]
+			
+			LDR R4, =0x006D		
+			REV16 R4, R4
+			STRH R4,[R0, #10]
+			
+			LDR R4, =0x8020		
+			REV16 R4, R4
+			STRH R4,[R0, #12]
+			
+			LDR R4, =0x0812		
+			REV16 R4, R4
+			STRH R4,[R0, #14]
+			
+			LDR R4, =0x00F0		
+			REV16 R4, R4
+			STRH R4,[R0, #16]
+			
+			LDR R4, =0x8010		
+			REV16 R4, R4
+			STRH R4,[R0, #18]
+loop_1
+			LDR R3, =0x8000
+			LDRH R6, [R0]	
+			REV16 R6, R6
+			CMP R6, R3	
+			BLT POS_loop 
+LOP_1
+			ADDS R0, R0, #2			
+			ADDS R2, R2, #1
+			CMP R2, #10
+			BEQ FLOPPA
+			BLS loop_1
+POS_loop
+			LDR  R3, =0x20000020
+			STRH R6, [R3]
+			LDRB R1, [R3]
+            CMP R1, 0x12
+			BNE LOP_1
+			REV16 R6, R6
+			STRH R6, [R5, R7]
+			ADDS R7, #2
+			BAL LOP_1
+FLOPPA
+			LDR  R0, =0x20000000    
+            LDR  R2, =0
+			LDR	 R1, =0x000F
+loop_2
+			LDR R3, =0x8000
+			LDRH R6, [R0]
+			REV16 R6, R6
+			CMP R6, R3	
+			BGT NEG_loop
+LOP_2
+			ADDS R0, R0, #2			
+			ADDS R2, R2, #1
+			CMP R2, #10
+			BEQ STOP
+			BLS loop_2
+
+NEG_loop
+			MOV R4, R6
+			ANDS R4, R1
+			CMP R4, #1
+			BGE LOP_2
+			REV16 R6, R6
+			STRH R6, [R5, R7]
+			ADDS R7, #2
+			BAL LOP_2
+STOP
+            B      STOP            
+
+            ALIGN                  
+
+            AREA    RESET, DATA, READONLY ; ???????? ?? ???????????? ???????? ??????????
+            EXPORT  Vectors         ; ??????? ????? Vectors ??? ????????????
+Vectors
+            DCD     0x20004000      ; ?????? ????? (????????? ????? ???)
+            DCD     Reset_Handler   ; ?????? ?????? (?????? ?????????)
+
+            END  

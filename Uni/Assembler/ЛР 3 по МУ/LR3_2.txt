@@ -1,0 +1,206 @@
+	AREA    RWDATA, DATA, READWRITE
+leght		equ		24
+
+            AREA    PROGRAM, CODE, READONLY
+            ENTRY
+
+Reset_Handler
+			LDR R0, =0x20000000 ; Start mass
+			LDR R7, =0x01 ; the remain of the division, to find negative numbers
+			LDR R5, =0x00 ; max element of mass
+			LDR R6, =0 ; counter
+
+			LDR R1, =0x0011 ; filling mass with numbers
+			STRH R1, [R0]
+			LDR R1, =0x0022
+			STRH R1, [R0, #2]
+			LDR R1, =0x0033
+			STRH R1, [R0, #4]
+			LDR R1, =0x0044
+			STRH R1, [R0, #6]
+			LDR R1, =0x0055
+			STRH R1, [R0, #8]
+			LDR R1, =0x0066
+			STRH R1, [R0, #10]
+			LDR R1, =0x0077
+			STRH R1, [R0, #12]
+			LDR R1, =0x0088
+			STRH R1, [R0, #14]
+			LDR R1, =0x0099
+			STRH R1, [R0, #16]
+			LDR R1, =0x0088
+			STRH R1, [R0, #18]
+			
+START
+			ADDS R6, R6, #1
+			CMP R6, #10 ; stop count
+			BEQ STOP
+			LDRH R1, [R0] ; load number to register
+			PUSH {R1}
+			MOV R3, SP
+			ADDS R0, R0, #2 ; 
+			MOV R2, R1 ; copy from R1 to R2
+			ANDS R2, R2, R7 ; parity check
+			CMP R2, R7 ; 
+			BNE max
+			CMP R6, #10
+			BLE START
+STOP
+			B STOP
+max
+			CMP R1, R5 ; compare register for max number finding
+			BLE START
+			MOV R4, R1 ; max element finding
+			MOV R8, R3 
+			
+			B START
+			
+			   AREA    RESET, DATA, READONLY
+            EXPORT  __Vectors
+__Vectors
+            DCD     0x20004000
+            DCD     Reset_Handler
+
+            END
+
+
+
+
+
+
+			------ СТАРОЕ РЕШЕНИЕ -----
+
+AREA    DATA, DATA, READWRITE 
+ARR_START   EQU 0x20000000
+ARR         DCB     0x00, 0x12, 0xF2, 0xA0, 0x52, 0xAC, 0x17, 0x51, 0x32, 0xBC, 0x22, 0x85, 0xF1, 0x15, 0xA3, 0x5F, 0x77
+            AREA    PROGRAM, CODE, READONLY     	
+            ENTRY                               	
+            ALIGN                              
+
+Reset_Handler
+			LDR R0, =0x20000000 
+			LDR R7, =0x01 
+			LDR R5, =0x00 
+			LDR R6, =0 
+			
+			LDR R1, =0x11 
+			STRB R1, [R0]
+			LDR R1, =0x22
+			STRB R1, [R0, #1]
+			LDR R1, =0x33
+			STRB R1, [R0, #2]
+			LDR R1, =0x88
+			STRB R1, [R0, #3]
+			LDR R1, =0x55
+			STRB R1, [R0, #4]
+			LDR R1, =0x66
+			STRB R1, [R0, #5]
+			LDR R1, =0x77
+			STRB R1, [R0, #6]
+			LDR R1, =0x08
+			STRB R1, [R0, #7]
+			LDR R1, =0x99
+			STRB R1, [R0, #8]
+			LDR R1, =0x43
+			STRB R1, [R0, #9]
+START
+			ADDS R6, R6, #1
+			CMP R6, #10
+			BHI STOP
+			LDRB R1, [R0]
+			
+			MOV R2, R1
+			ANDS R2, R7
+			CMP R2, R7 
+			BMI MAX
+MAX_OUT			
+			ADDS R0, R0, #1 ; 
+			CMP R6, #10
+			BLS START
+			BHI STOP
+MAX
+			CMP R1, R5
+			BLS MAX_OUT 
+			MOV R5, R1 
+			MOV R3, R0 
+			B MAX_OUT	
+STOP
+			B STOP			
+
+            AREA    RESET, DATA, READONLY 
+            EXPORT  Vectors         
+Vectors
+            DCD     0x20004000      
+            DCD     Reset_Handler   
+            END  
+
+
+
+
+
+
+
+			----- НОВОЕ ПРВИЛЬНОЕ РЕШЕНИЕ -----
+			            AREA    DATA, DATA, READWRITE 
+ARR_START   EQU 0x20000000
+ARR         DCB     0x00, 0x12, 0xF2, 0xA0, 0x52, 0xAC, 0x17, 0x51, 0x32, 0xBC, 0x22, 0x85, 0xF1, 0x15, 0xA3, 0x5F, 0x77
+            AREA    PROGRAM, CODE, READONLY     	
+            ENTRY                               	
+            ALIGN                              
+
+Reset_Handler
+			LDR R0, =0x20000000 
+			LDR R4, =0x01 
+			LDR R6, =0x00 
+			LDR R3, =0 
+			
+			LDR R1, =0x01 
+			STRB R1, [R0]
+			LDR R1, =0x02
+			STRB R1, [R0, #1]
+			LDR R1, =0x33
+			STRB R1, [R0, #2]
+			LDR R1, =0x04
+			STRB R1, [R0, #3]
+			LDR R1, =0x05
+			STRB R1, [R0, #4]
+			LDR R1, =0x66
+			STRB R1, [R0, #5]
+			LDR R1, =0x07
+			STRB R1, [R0, #6]
+			LDR R1, =0x08
+			STRB R1, [R0, #7]
+			LDR R1, =0x99
+			STRB R1, [R0, #8]
+			LDR R1, =0x0A
+			STRB R1, [R0, #9]
+LOOP
+			ADDS R3, R3, #1
+			CMP R3, #10
+			BHI STOP
+			LDRB R1, [R0]
+			MOV R2, R1
+			ANDS R2, R4
+			CMP R2, R4 
+			BMI MAX
+MAX_OUT			
+			ADDS R0, R0, #1 ; 
+			CMP R3, #10
+			BLS LOOP
+			BHI STOP
+MAX
+			CMP R1, R6
+			BLS MAX_OUT 
+			MOV R6, R1 
+			MOV R7, R0 
+			B MAX_OUT	
+STOP
+			B STOP			
+
+            AREA    RESET, DATA, READONLY ; ???????? ?? ???????????? ???????? ??????????
+            EXPORT  Vectors         ; ??????? ????? Vectors ??? ????????????
+Vectors
+            DCD     0x20004000      ; ?????? ????? (????????? ????? ???)
+            DCD     Reset_Handler   ; ?????? ?????? (?????? ?????????)
+
+            END  

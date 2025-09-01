@@ -1,0 +1,79 @@
+﻿            AREA    DATA, DATA, READWRITE 
+            AREA    PROGRAM, CODE, READONLY     	
+            ENTRY                               	
+            ALIGN                               ; ????????? ?? ????? (4 ?????)
+
+Reset_Handler
+            
+            LDR  R0, =0x20000000    
+			LDR  R1, =0           ; счетчик отрицательных элементов массива
+            LDR  R2, =0           ; счетчик элементов массива
+			LDR  R3, =0x8000           ; маска знака
+			LDR	 R5, =0x20000020				
+
+			LDR R4, =0x00A1		
+			REV16 R4, R4
+			STRH R4,[R0]
+			
+			LDR R4, =0x803A		
+			REV16 R4, R4
+			STRH R4,[R0, #2]
+			
+			LDR R4, =0x3443		
+			REV16 R4, R4
+			STRH R4,[R0, #4]
+			
+			LDR R4, =0x804B		
+			REV16 R4, R4
+			STRH R4,[R0, #6]
+			
+			LDR R4, =0x81C5		
+			REV16 R4, R4
+			STRH R4,[R0, #8]
+			
+			LDR R4, =0x006D		
+			REV16 R4, R4
+			STRH R4,[R0, #10]
+			
+			LDR R4, =0x8020		
+			REV16 R4, R4
+			STRH R4,[R0, #12]
+			
+			LDR R4, =0x0812		
+			REV16 R4, R4
+			STRH R4,[R0, #14]
+			
+			LDR R4, =0x00F0		
+			REV16 R4, R4
+			STRH R4,[R0, #16]
+			
+			LDR R4, =0x8010		
+			REV16 R4, R4
+			STRH R4,[R0, #18]
+loop
+			LDRH R6, [R0]	
+			REV16 R6, R6
+			CMP R6, R3	
+			BGT NEG
+loop_1
+			ADDS R0, R0, #2			
+			ADDS R2, R2, #1
+			CMP R2, #10
+			BEQ Stop
+			BLS loop
+
+NEG
+			ADDS R1, R1, #1
+			STRB R1, [R5]
+			B loop_1
+			
+Stop
+            B      Stop    	
+
+            AREA    RESET, DATA, READONLY ; ???????? ?? ???????????? ???????? ??????????
+            EXPORT  Vectors         ; ??????? ????? Vectors ??? ????????????
+Vectors
+            DCD     0x20004000      ; ?????? ????? (????????? ????? ???)
+            DCD     Reset_Handler   ; ?????? ?????? (?????? ?????????)
+
+            END 

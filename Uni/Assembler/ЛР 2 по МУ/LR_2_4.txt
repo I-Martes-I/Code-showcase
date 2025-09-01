@@ -1,0 +1,63 @@
+﻿            AREA    DATA, DATA, READWRITE 
+            AREA    PROGRAM, CODE, READONLY     	
+            ENTRY                               	
+            ALIGN                               ; ????????? ?? ????? (4 ?????)
+
+Reset_Handler
+            
+            LDR  R0, =0x20000000    ; начальный адрес исходного массива
+			LDR  R1, =0     	; счетчик элементов исходного массива
+            LDR  R2, =0     	; счетчик элементов нового массива
+			LDR  R3, =0x80000000	; маска знака
+			LDR	 R5, =0x20000040    ; начальный адрес нового массива		
+
+			LDR R4, =0x111111A1	
+			REV R4, R4
+			STR R4,[R0]
+			
+			LDR R4, =0x3333333A	
+			REV R4, R4
+			STR R4,[R0, #4]
+			
+			LDR R4, =0x80000043	
+			REV R4, R4
+			STR R4,[R0, #8]
+			
+			LDR R4, =0x8020202B	
+			REV R4, R4
+			STR R4,[R0, #12]
+			
+			LDR R4, =0x1141123C	
+			REV R4, R4
+			STR R4,[R0, #16]
+loop_1
+			LDR R6, [R0]
+			REV R6, R6			
+			TST R6, R3	
+			BNE NEG_ARR
+loop_2
+			ADDS R0, R0, #4			
+			ADDS R1, R1, #1
+			CMP R1, #5
+			BEQ Stop
+			BLS loop_1
+
+NEG_ARR
+			EORS R6, R3
+			RSBS R6, R6, #0
+			REV R6, R6
+			STR R6, [R5, R2]
+            REV R6, R6
+			ADDS R2, R2, #4
+			B loop_2
+			
+Stop
+            B      Stop    	
+
+            AREA    RESET, DATA, READONLY ; ???????? ?? ???????????? ???????? ??????????
+            EXPORT  Vectors         ; ??????? ????? Vectors ??? ????????????
+Vectors
+            DCD     0x20004000      ; ?????? ????? (????????? ????? ???)
+            DCD     Reset_Handler   ; ?????? ?????? (?????? ?????????)
+
+            END 
